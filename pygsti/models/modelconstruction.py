@@ -355,6 +355,13 @@ def _basis_create_operation(state_space, op_expr, basis="gm", parameterization="
                 elif opName == 'CZ': ex = -1j * theta * sigmaz / 2
                 Utarget = _spl.expm(ex)  # 2x2 unitary matrix operating on target qubit
 
+            elif opName == 'MS':
+                assert(len(args) == 2)  # qubit-label1, qubit-label2
+                label1 = to_label(args[0]); label2 = to_label(args[1])
+
+                Utarget = _np.array([[0, 1],
+                                     [1, 0]], 'd')
+
             else:  # opName in ('CNOT','CPHASE')
                 assert(len(args) == 2)  # qubit-label1, qubit-label2
                 label1 = to_label(args[0]); label2 = to_label(args[1])
@@ -362,6 +369,7 @@ def _basis_create_operation(state_space, op_expr, basis="gm", parameterization="
                 if opName == 'CNOT':
                     Utarget = _np.array([[0, 1],
                                          [1, 0]], 'd')
+
                 elif opName == 'CPHASE':
                     Utarget = _np.array([[1, 0],
                                          [0, -1]], 'd')
@@ -385,6 +393,24 @@ def _basis_create_operation(state_space, op_expr, basis="gm", parameterization="
             superop_mx_pp = Uop_embed.to_dense(on_space='HilbertSchmidt')
             # a real 4*num_qubits x 4*num_qubits mx superoperator in final basis
             superop_mx_in_basis = _bt.change_basis(superop_mx_pp, 'pp', basis)
+
+        elif opName == 'MS':
+            assert(len(args) == 2)  # qubit-label1, qubit-label2
+            label1 = to_label(args[0])
+            label2 = to_label(args[1])
+            U = 1./_np.sqrt(2) * _np.array([[1,   0,   0, 1j],
+                                            [0,   1, -1j,  0],
+                                            [0, -1j,   1,  0],
+                                            [1j,  0,   0,  1]])
+            Uop = _op.StaticUnitaryOp(U, 'pp', build_evotype)
+
+            # a complex 2*num_qubits x 2*num_qubits mx unitary on full space
+            Uop_embed = _op.EmbeddedOp(state_space, [label1, label2], Uop)
+            # a real 4*num_qubits x 4*num_qubits mx superoperator in Pauli-product basis
+            superop_mx_pp = Uop_embed.to_dense(on_space='HilbertSchmidt')
+            # a real 4*num_qubits x 4*num_qubits mx superoperator in final basis
+            superop_mx_in_basis = _bt.change_basis(superop_mx_pp, 'pp', basis)
+
 
         elif opName == "LX":  # TODO - better way to describe leakage?
             assert(len(args) == 3)  # theta, dmIndex1, dmIndex2 - X rotation between any two density matrix basis states
