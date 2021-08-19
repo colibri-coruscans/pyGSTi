@@ -364,6 +364,20 @@ def basis_build_operation(stateSpaceLabels, opExpr, basis="gm", parameterization
             pp_opMx = _op.StaticDenseOp(_bt.change_basis(operationMx, 'std', 'pp'), evotype='densitymx')
             opTermInFinalBasis = _op.EmbeddedDenseOp(sslbls, [label1, label2], pp_opMx)
 
+        elif opName == 'MS':
+            assert(len(args) == 2)  # qubit-label1, qubit-label2
+            label1 = to_label(args[0])
+            label2 = to_label(args[1])
+            Uop = 1./_np.sqrt(2) * _np.array([[1,   0,   0, 1j],
+                                            [0,   1, -1j,  0],
+                                            [0, -1j,   1,  0],
+                                            [1j,  0,   0,  1]])
+            # complex 16x16 mx operating on vectorized 2Q densty matrix in std basis
+            operationMx = _gt.unitary_to_process_mx(Uop)
+            # *real* 16x16 mx in Pauli-product basis -- better for parameterization
+            pp_opMx = _op.StaticDenseOp(_bt.change_basis(operationMx, 'std', 'pp'), evotype='densitymx')
+            opTermInFinalBasis = _op.EmbeddedDenseOp(sslbls, [label1, label2], pp_opMx)
+
         elif opName == "LX":  # TODO - better way to describe leakage?
             assert(len(args) == 3)  # theta, dmIndex1, dmIndex2 - X rotation between any two density matrix basis states
             theta = eval(args[0], {"__builtins__": None}, {'pi': _np.pi})
