@@ -366,6 +366,49 @@ def create_operation(op_expr, state_space, basis="pp", parameterization="full", 
             # a real 4*num_qubits x 4*num_qubits mx superoperator in final basis
             superop_mx_in_basis = _bt.change_basis(superop_mx_pp, 'pp', basis)
 
+        elif opName == 'ZZ':
+            # Unitary in acting on the state-space { |A>, |B>, |C>, |D> } == { |00>, |01>, |10>, |11> }.
+            # This unitary rotates the second qubit by pi/2 in either the (+) or (-) direction based on 
+            # the state of the first qubit.
+            U = 1./_np.sqrt(2) * _np.array([[1-1j,0,0,0],
+                                                [0,1+1j,0,0],
+                                                [0,0,1+1j,0],
+                                                [0,0,0,1-1j]])
+
+            # Convert this unitary into a "superoperator", which acts on the 
+            # space of vectorized density matrices instead of just the state space.
+            # These superoperators are what GST calls "gates".
+            opTermInStdBasis = _ot.unitary_to_process_mx(U)
+
+            # After the call to unitary_to_process_mx, the superoperator is a complex matrix
+            # in the "standard" or "matrix unit" basis given by { |A><A|, |A><B|, etc }.
+            # For use in GST, we want to work with a *real* matrix in either the 
+            # Gell-Mann or Pauli-product basis. Here we choose the Pauli-product basis,
+            # which is typically more intuitive when working with 2 qubits.
+            superop_mx_in_basis = _bt.change_basis(opTermInStdBasis, "std", "pp")
+       
+        elif opName == 'XX':
+            # Unitary in acting on the state-space { |A>, |B>, |C>, |D> } == { |00>, |01>, |10>, |11> }.
+            # This unitary rotates the second qubit by pi/2 in either the (+) or (-) direction based on 
+            # the state of the first qubit.
+            U = 1./_np.sqrt(2) * _np.array([[1,0,0,-1j],
+                                                [0,1,-1j,0],
+                                                [0,-1j,1,0],
+                                                [-1j,0,0,1]])
+
+            # Convert this unitary into a "superoperator", which acts on the 
+            # space of vectorized density matrices instead of just the state space.
+            # These superoperators are what GST calls "gates".
+            opTermInStdBasis = _ot.unitary_to_process_mx(U)
+
+            # After the call to unitary_to_process_mx, the superoperator is a complex matrix
+            # in the "standard" or "matrix unit" basis given by { |A><A|, |A><B|, etc }.
+            # For use in GST, we want to work with a *real* matrix in either the 
+            # Gell-Mann or Pauli-product basis. Here we choose the Pauli-product basis,
+            # which is typically more intuitive when working with 2 qubits.
+            superop_mx_in_basis = _bt.change_basis(opTermInStdBasis, "std", "pp")
+
+
         elif opName == "LX":  # TODO - better way to describe leakage?
             assert(len(args) == 3)  # theta, dmIndex1, dmIndex2 - X rotation between any two density matrix basis states
             theta = eval(args[0], {"__builtins__": None}, {'pi': _np.pi})
