@@ -1038,6 +1038,7 @@ def find_std_clifford_compilation(model, verbosity=0):
                           "std2Q_XXYYII",
                           "std2Q_XY",
                           "std2Q_XYCNOT",
+                          "std2Q_XYZZ",
                           "std2Q_XYCPHASE",
                           "std2Q_XYI",
                           "std2Q_XYI1",
